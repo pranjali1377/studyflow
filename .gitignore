@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+node_modules/
+.firebase/
+firebase-debug.log
+# Private credentials
+service-account*.json
+*-service-account*.json
+*.pem
+*.key
+
+# Other Firebase debug logs
+firestore-debug.log
+
+# Backup files
+script backup.js

@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyFlow - Student Productivity &amp; Study Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+  <!-- Full-Screen Initial Auth Loading Screen -->
+  <div id="app-loading-screen" class="app-loading-screen">
+    <div class="loading-spinner-box">
+      <div class="brand-badge mini" style="margin-bottom: 14px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div class="loading-spinner"></div>
+      <p class="loading-label">Connecting to StudyFlow...</p>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- ========================================================
+       1. WELCOME / LOGIN SCREEN
+       ======================================================== -->
+  <div id="auth-screen" class="screen-view auth-container">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="brand-badge">
+          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <h1 class="brand-title">Study<span class="gradient-text">Flow</span></h1>
+        <p class="brand-tagline">High-performance student productivity & study planning suite</p>
+      </div>
+
+      <div class="auth-box">
+        <div class="auth-header">
+          <h2>Welcome Back</h2>
+          <p>Sign in to access your personal study dashboard and schedule.</p>
+        </div>
+
+        <form id="auth-form" class="auth-form">
+          <div class="form-group">
+            <label for="auth-name">Full Name</label>
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <input type="text" id="auth-name" placeholder="e.g. Alex Mercer" required autocomplete="name">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="auth-email">College / University Email</label>
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <input type="email" id="auth-email" placeholder="alex@college.edu" required autocomplete="email">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="auth-password">Password</label>
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <input type="password" id="auth-password" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+          </div>
+
+          <div class="auth-aux-row">
+            <button type="button" id="btn-forgot-password" class="link-btn">Forgot Password?</button>
+          </div>
+
+          <div class="auth-actions">
+            <button type="button" id="btn-signin" class="btn btn-primary btn-block btn-lg">
+              <span>Sign In</span>
+            </button>
+
+            <button type="button" id="btn-signup" class="btn btn-secondary btn-block btn-lg">
+              <span>Create Account</span>
+            </button>
+          </div>
+
+          <button type="button" id="btn-quick-demo" class="btn btn-secondary btn-block">
+            <span>⚡ Explore with Demo Profile</span>
+          </button>
+        </form>
+
+        <div class="auth-notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <p><strong>Cloud Synced:</strong> Secured with Firebase Authentication & Cloud Firestore. Your schedule, tasks, and progress sync across devices.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       2. INITIAL SETUP SCREEN (Daily Routine Configuration)
+       ======================================================== -->
+  <div id="setup-screen" class="screen-view setup-container" style="display: none;">
+    <div class="setup-card">
+      <div class="setup-header">
+        <span class="step-badge">Step 1 of 1 · Routine Config</span>
+        <h2>Configure Your Daily Rhythm</h2>
+        <p>Set your daily schedule to unlock personalized timeline tracking, study targets, and intelligent focus windows.</p>
+      </div>
+
+      <div class="preset-strip">
+        <span class="preset-label">Quick Presets:</span>
+        <button type="button" class="preset-chip" id="preset-college">🏫 Typical College Day</button>
+        <button type="button" class="preset-chip" id="preset-exam">🔥 Exam Sprint (6h Target)</button>
+        <button type="button" class="preset-chip" id="preset-weekend">☕ Flexible Study Day</button>
+      </div>
+
+      <form id="setup-form" class="setup-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="setup-wake">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+              Wake-up Time
+            </label>
+            <input type="time" id="setup-wake" value="06:30" required>
+          </div>
+
+          <div class="form-group">
+            <label for="setup-sleep">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              Sleep Time
+            </label>
+            <input type="time" id="setup-sleep" value="23:30" required>
+          </div>
+
+          <div class="form-group">
+            <label for="setup-work-start">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+              College / Work Start
+            </label>
+            <input type="time" id="setup-work-start" value="09:00" required>
+          </div>
+
+          <div class="form-group">
+            <label for="setup-work-end">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              College / Work End
+            </label>
+            <input type="time" id="setup-work-end" value="16:00" required>
+          </div>
+
+          <div class="form-group">
+            <label for="setup-study-start">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Study Window Start
+            </label>
+            <input type="time" id="setup-study-start" value="18:00" required>
+          </div>
+
+          <div class="form-group">
+            <label for="setup-study-end">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 8 14"/></svg>
+              Study Window End
+            </label>
+            <input type="time" id="setup-study-end" value="22:00" required>
+          </div>
+        </div>
+
+        <div class="form-group target-group">
+          <div class="target-header">
+            <label for="setup-target">Daily Study Target</label>
+            <span class="target-value" id="setup-target-display">4.0 Hours</span>
+          </div>
+          <div class="slider-wrapper">
+            <input type="range" id="setup-target" min="1" max="12" step="0.5" value="4.0">
+            <div class="slider-ticks">
+              <span>1h</span>
+              <span>4h</span>
+              <span>8h</span>
+              <span>12h</span>
+            </div>
+          </div>
+          <p class="field-hint">We recommend 3–5 hours for regular college semesters and 6+ hours during finals.</p>
+        </div>
+
+        <div class="setup-actions">
+          <button type="submit" class="btn btn-primary btn-block btn-lg">
+            <span>Complete Setup & Enter Dashboard</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       3. MAIN APP CONTAINER (Sidebar + Dynamic Views)
+       ======================================================== -->
+  <div id="app-screen" class="app-layout" style="display: none;">
+    <!-- Desktop Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-badge mini">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">Study<span class="gradient-text">Flow</span></span>
+          <span class="brand-version">v1.0 prototype</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span>Dashboard</span>
+        </button>
+
+        <button class="nav-item" data-view="tasks">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          <span>Tasks</span>
+          <span class="nav-badge" id="sidebar-pending-badge">0</span>
+        </button>
+
+        <button class="nav-item" data-view="study">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Study Timer</span>
+          <span class="pulse-indicator" id="sidebar-timer-pulse" style="display: none;"></span>
+        </button>
+
+        <button class="nav-item" data-view="progress">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span>Progress</span>
+        </button>
+
+        <button class="nav-item" data-view="review">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>Daily Review</span>
+        </button>
+
+        <button class="nav-item" data-view="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <div class="user-avatar" id="sidebar-user-avatar">--</div>
+          <div class="user-meta">
+            <span class="user-name" id="sidebar-user-name">Student</span>
+            <span class="user-status"><span class="status-dot"></span> In Focus Zone</span>
+          </div>
+        </div>
+        <button id="btn-quick-logout" class="btn-logout" title="Log Out / Switch Account">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Mobile Top Header Bar -->
+    <header class="mobile-header">
+      <div class="mobile-brand">
+        <div class="brand-badge mini">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <span class="brand-name">Study<span class="gradient-text">Flow</span></span>
+      </div>
+      <div class="mobile-meta">
+        <span class="date-badge" id="mobile-date-badge">Oct 8</span>
+        <button class="avatar-pill" id="mobile-profile-btn" data-view="settings">
+          <span id="mobile-user-initials">--</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Work Area -->
+    <main class="main-content">
+      <!-- Universal Top Bar -->
+      <div class="topbar">
+        <div class="greeting-section">
+          <h1 class="greeting-title" id="topbar-greeting">Welcome 👋</h1>
+          <p class="greeting-subtitle" id="topbar-date">Thursday, October 8, 2026</p>
+        </div>
+
+        <div class="quote-card">
+          <div class="quote-content">
+            <svg class="quote-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/></svg>
+            <p id="quote-text">"Deep focus is the superpower of the 21st-century knowledge worker."</p>
+          </div>
+          <button id="btn-refresh-quote" class="btn-icon-subtle" title="New motivational quote">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </button>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="btn btn-secondary btn-sm" id="btn-topbar-new-task">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Add Task</span>
+          </button>
+          <button class="btn btn-primary btn-sm" id="btn-topbar-study">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            <span>Start Focus</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- VIEW 1: DASHBOARD -->
+      <section id="view-dashboard" class="content-view active">
+        <!-- KPI Metric Cards Grid -->
+        <div class="kpi-grid">
+          <!-- Card 1: Today's Study Time -->
+          <div class="card kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Today's Study</span>
+              <div class="kpi-icon-wrap cyan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+            </div>
+            <div class="kpi-body">
+              <div class="kpi-value-row">
+                <span class="kpi-main-num" id="dash-study-completed">2.5h</span>
+                <span class="kpi-sub-num">/ <span id="dash-study-target">4.0h</span> target</span>
+              </div>
+              <div class="progress-bar-wrapper">
+                <div class="progress-bar-fill cyan-glow" id="dash-study-bar" style="width: 62.5%;"></div>
+              </div>
+              <div class="kpi-footer-row">
+                <span class="kpi-pct" id="dash-study-pct">63% reached</span>
+                <span class="kpi-remaining" id="dash-study-remaining">1.5h to goal</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Task Completion -->
+          <div class="card kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Tasks Done Today</span>
+              <div class="kpi-icon-wrap emerald">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+            </div>
+            <div class="kpi-body">
+              <div class="kpi-value-row">
+                <span class="kpi-main-num" id="dash-tasks-completed">3</span>
+                <span class="kpi-sub-num">/ <span id="dash-tasks-total">5</span> tasks</span>
+              </div>
+              <div class="progress-bar-wrapper">
+                <div class="progress-bar-fill emerald-glow" id="dash-task-bar" style="width: 60%;"></div>
+              </div>
+              <div class="kpi-footer-row">
+                <span class="kpi-pct" id="dash-task-pct">60% completed</span>
+                <span class="kpi-remaining" id="dash-tasks-pending-count">2 pending</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Active Streak -->
+          <div class="card kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Study Streak</span>
+              <div class="kpi-icon-wrap amber">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3.5z"/></svg>
+              </div>
+            </div>
+            <div class="kpi-body">
+              <div class="kpi-value-row">
+                <span class="kpi-main-num" id="dash-streak-count">5</span>
+                <span class="kpi-sub-num">Days in a row 🔥</span>
+              </div>
+              <div class="streak-dots" id="dash-streak-dots">
+                <!-- Dynamically generated week streak dots -->
+              </div>
+              <div class="kpi-footer-row">
+                <span class="kpi-pct text-amber">Consistent Momentum</span>
+                <span class="kpi-remaining">Keep the flame alive!</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Daily Productivity Score -->
+          <div class="card kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Flow Index</span>
+              <div class="kpi-icon-wrap purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+            </div>
+            <div class="kpi-body">
+              <div class="kpi-value-row">
+                <span class="kpi-main-num" id="dash-flow-score">85</span>
+                <span class="kpi-sub-num">/ 100 rating</span>
+              </div>
+              <div class="progress-bar-wrapper">
+                <div class="progress-bar-fill purple-glow" id="dash-flow-bar" style="width: 85%;"></div>
+              </div>
+              <div class="kpi-footer-row">
+                <span class="kpi-pct" id="dash-flow-badge">High Focus</span>
+                <span class="kpi-remaining">Combined study & tasks</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Middle Section: Today's Schedule Timeline & Focus Prompt -->
+        <div class="dashboard-middle-grid">
+          <!-- Timeline Card -->
+          <div class="card timeline-card">
+            <div class="card-header-flex">
+              <div>
+                <h3 class="card-heading">Today's Daily Routine Timeline</h3>
+                <p class="card-subheading">Synchronized with your personal daily rhythm config</p>
+              </div>
+              <span class="current-phase-pill" id="timeline-current-phase">
+                <span class="phase-indicator-dot"></span>
+                <span id="timeline-phase-text">College / Work Window</span>
+              </span>
+            </div>
+
+            <!-- Visual segmented timeline bar -->
+            <div class="timeline-visual-bar" id="timeline-bar-segments">
+              <!-- Rendered via JS -->
+            </div>
+
+            <div class="timeline-blocks-list" id="timeline-blocks-list">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Quick Focus Action Card -->
+          <div class="card quick-focus-card">
+            <div class="quick-focus-header">
+              <span class="badge-tag">⚡ Quick Session</span>
+              <h3>Start Studying Now</h3>
+              <p>Jump directly into an uninterrupted study session with the live stopwatch.</p>
+            </div>
+            <div class="quick-focus-subject">
+              <label for="dash-quick-subject">Subject / Topic</label>
+              <input type="text" id="dash-quick-subject" placeholder="e.g. Operating Systems, Calculus III" value="Data Structures & Algorithms">
+            </div>
+            <div class="quick-focus-actions">
+              <button class="btn btn-primary btn-block" id="btn-dash-jump-timer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>Launch Timer</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Grid: Priority Tasks Preview & Daily Review Teaser -->
+        <div class="dashboard-bottom-grid">
+          <!-- Today's Priority Tasks Card -->
+          <div class="card tasks-preview-card">
+            <div class="card-header-flex">
+              <div>
+                <h3 class="card-heading">Today's Priority Tasks</h3>
+                <p class="card-subheading"><span id="dash-preview-pending-text">2 pending tasks</span> requiring your attention</p>
+              </div>
+              <button class="btn btn-outline btn-sm" id="btn-dash-view-all-tasks">
+                <span>View All Tasks →</span>
+              </button>
+            </div>
+
+            <div class="dash-task-list" id="dash-task-preview-list">
+              <!-- Dynamically populated tasks -->
+            </div>
+          </div>
+
+          <!-- Daily Review Widget Card -->
+          <div class="card review-widget-card">
+            <div class="card-header-flex">
+              <div>
+                <h3 class="card-heading">Evening Reflection</h3>
+                <p class="card-subheading">Close your day with deliberate feedback</p>
+              </div>
+              <span class="status-pill-small" id="dash-review-status-pill">Pending</span>
+            </div>
+
+            <div class="review-widget-content" id="dash-review-widget-content">
+              <p class="review-prompt-text">Have you completed your study goals today? Take 60 seconds to rate your progress and set tomorrow's priority.</p>
+              <div class="review-widget-stats">
+                <div class="mini-stat">
+                  <span class="mini-label">Hours</span>
+                  <span class="mini-val" id="dash-review-hrs">2.5h</span>
+                </div>
+                <div class="mini-stat">
+                  <span class="mini-label">Done</span>
+                  <span class="mini-val" id="dash-review-done">3 / 5</span>
+                </div>
+              </div>
+              <button class="btn btn-secondary btn-block" id="btn-dash-open-review">
+                <span>Complete Daily Review 📝</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: TASK MANAGEMENT -->
+      <section id="view-tasks" class="content-view">
+        <div class="view-header-flex">
+          <div>
+            <h2 class="view-title">Task Management</h2>
+            <p class="view-subtitle">Organize daily coursework, track study goals, and review past achievements</p>
+          </div>
+          <button class="btn btn-primary" id="btn-open-add-task-modal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Add New Task</span>
+          </button>
+        </div>
+
+        <!-- Task View Mode Bar: Today's Tasks vs Task History -->
+        <div class="task-view-mode-bar">
+          <div class="mode-switcher-pill">
+            <button type="button" class="view-mode-btn active" id="btn-view-mode-today">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+              <span>Today's Tasks</span>
+              <span class="mode-count-badge" id="count-tab-today">0</span>
+            </button>
+            <button type="button" class="view-mode-btn" id="btn-view-mode-history">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/><path d="M3.05 11a9 9 0 1 1 .5 4"/></svg>
+              <span>Task History</span>
+              <span class="mode-count-badge" id="count-tab-history">0</span>
+            </button>
+          </div>
+          <div class="task-date-indicator">
+            <span class="indicator-dot"></span>
+            <span id="task-current-date-label">Today</span>
+          </div>
+        </div>
+
+        <!-- SUBSECTION 1: TODAY'S TASKS -->
+        <div id="section-today-tasks">
+          <!-- Task Filters and Search Bar -->
+          <div class="task-controls-strip">
+            <div class="filter-group">
+              <button class="filter-pill active" data-filter-status="all">All (<span id="count-filter-all">0</span>)</button>
+              <button class="filter-pill" data-filter-status="pending">Pending (<span id="count-filter-pending">0</span>)</button>
+              <button class="filter-pill" data-filter-status="completed">Completed (<span id="count-filter-completed">0</span>)</button>
+            </div>
+
+            <div class="filter-selects">
+              <select id="task-filter-category" class="select-input">
+                <option value="all">All Categories</option>
+                <option value="Computer Science">Computer Science</option>
+                <option value="Mathematics">Mathematics</option>
+                <option value="Projects">Projects</option>
+                <option value="Assignments">Assignments</option>
+                <option value="General">General</option>
+              </select>
+
+              <select id="task-filter-priority" class="select-input">
+                <option value="all">All Priorities</option>
+                <option value="High">High Priority</option>
+                <option value="Medium">Medium Priority</option>
+                <option value="Low">Low Priority</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Tasks Container -->
+          <div class="tasks-container">
+            <div class="task-items-list" id="task-full-list">
+              <!-- Rendered by TaskController -->
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBSECTION 2: TASK HISTORY (ARCHIVED PREVIOUS DAYS) -->
+        <div id="section-history-tasks" style="display: none;">
+          <!-- History Controls Strip -->
+          <div class="task-controls-strip">
+            <div class="filter-group">
+              <button class="filter-pill active" data-history-filter="all">All History (<span id="count-history-all">0</span>)</button>
+              <button class="filter-pill" data-history-filter="completed">Completed (<span id="count-history-completed">0</span>)</button>
+              <button class="filter-pill" data-history-filter="incomplete">Unfinished (<span id="count-history-incomplete">0</span>)</button>
+            </div>
+
+            <div class="filter-selects">
+              <select id="history-filter-date" class="select-input">
+                <option value="all">All Past Dates</option>
+                <!-- Populated dynamically -->
+              </select>
+
+              <select id="history-filter-category" class="select-input">
+                <option value="all">All Categories</option>
+                <option value="Computer Science">Computer Science</option>
+                <option value="Mathematics">Mathematics</option>
+                <option value="Projects">Projects</option>
+                <option value="Assignments">Assignments</option>
+                <option value="General">General</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- History Groups Container -->
+          <div class="tasks-container">
+            <div class="task-history-groups" id="task-history-list">
+              <!-- Rendered by TaskController -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: STUDY TRACKER -->
+      <section id="view-study" class="content-view">
+        <div class="view-header-flex">
+          <div>
+            <h2 class="view-title">Study Focus Station</h2>
+            <p class="view-subtitle">Deep work stopwatch and session tracker with persistent logging</p>
+          </div>
+        </div>
+
+        <div class="study-layout-grid">
+          <!-- Active Timer Station Card -->
+          <div class="card timer-station-card">
+            <div class="timer-config-row">
+              <div class="form-group flex-1">
+                <label for="timer-subject-input">Current Subject / Module</label>
+                <div class="input-with-datalist">
+                  <input type="text" id="timer-subject-input" placeholder="e.g. Computer Networks, Linear Algebra" value="Data Structures & Algorithms">
+                </div>
+              </div>
+              <div class="timer-mode-pills">
+                <button type="button" class="mode-pill active" data-mode="stopwatch">Stopwatch</button>
+                <button type="button" class="mode-pill" data-mode="pomodoro">25m Pomodoro</button>
+                <button type="button" class="mode-pill" data-mode="deep">50m Deep Work</button>
+              </div>
+            </div>
+
+            <!-- Glowing Circular SVG Timer -->
+            <div class="circular-timer-wrapper">
+              <svg class="timer-svg" viewBox="0 0 300 300">
+                <defs>
+                  <linearGradient id="timer-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#38bdf8" />
+                    <stop offset="100%" stop-color="#2563eb" />
+                  </linearGradient>
+                  <filter id="timer-glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="6" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
+                <circle class="timer-circle-bg" cx="150" cy="150" r="130" />
+                <circle class="timer-circle-progress" id="timer-progress-ring" cx="150" cy="150" r="130" stroke="url(#timer-gradient)" filter="url(#timer-glow)" />
+              </svg>
+              <div class="timer-display-overlay">
+                <span class="timer-status-tag" id="timer-status-tag">Ready</span>
+                <span class="timer-digits" id="timer-digits-display">00:00:00</span>
+                <span class="timer-subject-display" id="timer-subject-display">Data Structures & Algorithms</span>
+              </div>
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="timer-controls">
+              <button class="btn btn-primary btn-lg" id="btn-timer-start">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span>Start Session</span>
+              </button>
+
+              <button class="btn btn-secondary btn-lg" id="btn-timer-pause" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                <span>Pause</span>
+              </button>
+
+              <button class="btn btn-primary btn-lg" id="btn-timer-resume" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span>Resume</span>
+              </button>
+
+              <button class="btn btn-emerald btn-lg" id="btn-timer-finish" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <span>Finish & Save</span>
+              </button>
+
+              <button class="btn btn-outline" id="btn-timer-reset" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                <span>Reset</span>
+              </button>
+            </div>
+
+            <div class="timer-footer-note">
+              <span>💡 When you finish, duration is added to today's study total and saved to localStorage history.</span>
+            </div>
+          </div>
+
+          <!-- Session History List -->
+          <div class="card session-history-card">
+            <div class="card-header-flex">
+              <div>
+                <h3 class="card-heading">Completed Sessions History</h3>
+                <p class="card-subheading">All logged study intervals</p>
+              </div>
+              <span class="badge-tag" id="history-total-sessions">0 Sessions</span>
+            </div>
+
+            <div class="session-history-list" id="session-history-list">
+              <!-- Dynamically populated history -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: PROGRESS & ANALYTICS -->
+      <section id="view-progress" class="content-view">
+        <div class="view-header-flex">
+          <div>
+            <h2 class="view-title">Productivity & Study Progress</h2>
+            <p class="view-subtitle">High-fidelity metrics calculated across all your study sessions and tasks</p>
+          </div>
+        </div>
+
+        <!-- 7 Metric Cards Grid -->
+        <div class="progress-metric-grid">
+          <div class="card stat-metric-box">
+            <span class="stat-metric-title">Total Study Hours</span>
+            <span class="stat-metric-number text-cyan" id="stat-total-hours">0.0h</span>
+            <span class="stat-metric-sub">Lifetime logged focus</span>
+          </div>
+
+          <div class="card stat-metric-box">
+            <span class="stat-metric-title">Weekly Study Hours</span>
+            <span class="stat-metric-number text-blue" id="stat-weekly-hours">0.0h</span>
+            <span class="stat-metric-sub">Past 7 rolling days</span>
+          </div>
+
+          <div class="card stat-metric-box">
+            <span class="stat-metric-title">Monthly Study Hours</span>
+            <span class="stat-metric-number text-purple" id="stat-monthly-hours">0.0h</span>
+            <span class="stat-metric-sub">Current calendar month</span>
+          </div>
+
+          <div class="card stat-metric-box">
+            <span class="stat-metric-title">Task Completion Rate</span>
+            <span class="stat-metric-number text-emerald" id="stat-task-completion-rate">0%</span>
+            <span class="stat-metric-sub">Total completed / all tasks</span>
+          </div>
+
+          <div class="card stat-metric-box">
+            <span class="stat-metric-title">Average Daily Rating</span>
+            <span class="stat-metric-number text-amber" id="stat-avg-rating">0.0 / 10</span>
+            <span class="stat-metric-sub">From evening reviews</span>
+          </div>
+
+          <div class="card stat-metric-box">
+            <span class="stat-metric-title">Current Study Streak</span>
+            <span class="stat-metric-number text-rose" id="stat-streak-days">0 Days</span>
+            <span class="stat-metric-sub">Consecutive active days</span>
+          </div>
+
+          <div class="card stat-metric-box">
+            <span class="stat-metric-title">Best Study Day</span>
+            <span class="stat-metric-number text-cyan" id="stat-best-day">—</span>
+            <span class="stat-metric-sub" id="stat-best-day-val">0.0h peak focus</span>
+          </div>
+        </div>
+
+        <!-- Visual Charts Grid (Vanilla HTML/CSS/SVG) -->
+        <div class="analytics-charts-grid">
+          <!-- 7-Day Study Bar Chart -->
+          <div class="card chart-card">
+            <div class="card-header-flex">
+              <div>
+                <h3 class="card-heading">Last 7 Days Study Hours</h3>
+                <p class="card-subheading">Visual comparison against daily target (<span id="chart-target-label">4.0h</span>)</p>
+              </div>
+            </div>
+
+            <div class="bar-chart-container" id="bar-chart-weekly">
+              <!-- Rendered via JS using pure CSS/SVG bars with tooltips -->
+            </div>
+          </div>
+
+          <!-- Subject Breakdown Card -->
+          <div class="card chart-card">
+            <div class="card-header-flex">
+              <div>
+                <h3 class="card-heading">Subject Focus Distribution</h3>
+                <p class="card-subheading">Relative time invested across academic subjects</p>
+              </div>
+            </div>
+
+            <div class="subject-breakdown-container" id="subject-breakdown-list">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 5: DAILY REVIEW -->
+      <section id="view-review" class="content-view">
+        <div class="view-header-flex">
+          <div>
+            <h2 class="view-title">End-of-Day Review</h2>
+            <p class="view-subtitle">Reflect on today's output, capture friction points, and prime tomorrow's goals</p>
+          </div>
+        </div>
+
+        <div class="daily-review-grid">
+          <!-- Left: Today's Review Form -->
+          <div class="card review-form-card">
+            <div class="review-date-badge">
+              <span id="review-current-date-str">Thursday, October 8, 2026</span>
+            </div>
+
+            <!-- Auto Summary Badges -->
+            <div class="review-summary-strip">
+              <div class="review-summary-item">
+                <span class="label">Completed Tasks</span>
+                <span class="val text-emerald" id="review-summary-completed">0</span>
+              </div>
+              <div class="review-summary-item">
+                <span class="label">Pending Tasks</span>
+                <span class="val text-amber" id="review-summary-pending">0</span>
+              </div>
+              <div class="review-summary-item">
+                <span class="label">Total Study Time</span>
+                <span class="val text-cyan" id="review-summary-study">0h 0m</span>
+              </div>
+            </div>
+
+            <form id="daily-review-form" class="review-form">
+              <!-- Rating Selector 1 to 10 -->
+              <div class="form-group">
+                <label>Day Productivity Rating (1 to 10)</label>
+                <div class="rating-pill-selector" id="rating-selector">
+                  <button type="button" class="rate-btn" data-rating="1">1</button>
+                  <button type="button" class="rate-btn" data-rating="2">2</button>
+                  <button type="button" class="rate-btn" data-rating="3">3</button>
+                  <button type="button" class="rate-btn" data-rating="4">4</button>
+                  <button type="button" class="rate-btn" data-rating="5">5</button>
+                  <button type="button" class="rate-btn" data-rating="6">6</button>
+                  <button type="button" class="rate-btn" data-rating="7">7</button>
+                  <button type="button" class="rate-btn active" data-rating="8">8</button>
+                  <button type="button" class="rate-btn" data-rating="9">9</button>
+                  <button type="button" class="rate-btn" data-rating="10">10</button>
+                </div>
+                <input type="hidden" id="review-rating-value" value="8">
+              </div>
+
+              <!-- Reflection Text Box -->
+              <div class="form-group">
+                <label for="review-reflection">Daily Reflection & Retrospective</label>
+                <textarea id="review-reflection" rows="4" placeholder="What went well today? What caused friction, delays, or distractions? What did you master?" required></textarea>
+              </div>
+
+              <!-- Tomorrow's Priority Text Box -->
+              <div class="form-group">
+                <label for="review-tomorrow-priority">Tomorrow's Core Priority & Targets</label>
+                <textarea id="review-tomorrow-priority" rows="3" placeholder="What is the single most important task or exam topic you must conquer tomorrow?" required></textarea>
+              </div>
+
+              <div class="review-submit-row">
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                  <span>Save Daily Review</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Right: Past Reviews History -->
+          <div class="card past-reviews-card">
+            <div class="card-header-flex">
+              <div>
+                <h3 class="card-heading">Past Daily Reviews</h3>
+                <p class="card-subheading">Your historical reflections and accountability log</p>
+              </div>
+            </div>
+
+            <div class="past-reviews-list" id="past-reviews-list">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 6: SETTINGS -->
+      <section id="view-settings" class="content-view">
+        <div class="view-header-flex">
+          <div>
+            <h2 class="view-title">System Settings & Routine</h2>
+            <p class="view-subtitle">Manage user profile, study targets, routine schedule, and prototype storage</p>
+          </div>
+        </div>
+
+        <div class="settings-grid">
+          <!-- Profile & Target Card -->
+          <div class="card settings-card">
+            <h3 class="card-heading">User Profile & Study Target</h3>
+            <p class="card-subheading">Update your identification and daily dedication goal</p>
+
+            <form id="settings-profile-form" class="settings-form">
+              <div class="form-group">
+                <label for="settings-name">Full Name</label>
+                <input type="text" id="settings-name" required>
+              </div>
+
+              <div class="form-group">
+                <label for="settings-email">Email (Read Only)</label>
+                <input type="email" id="settings-email" disabled class="input-disabled">
+              </div>
+
+              <div class="form-group">
+                <div class="target-header">
+                  <label for="settings-target">Daily Study Target</label>
+                  <span class="target-value" id="settings-target-display">4.0 Hours</span>
+                </div>
+                <input type="range" id="settings-target" min="1" max="12" step="0.5" value="4.0">
+              </div>
+
+              <button type="submit" class="btn btn-primary">
+                <span>Save Profile Settings</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Routine Times Card -->
+          <div class="card settings-card">
+            <h3 class="card-heading">Daily Routine Schedule</h3>
+            <p class="card-subheading">Adjust your daily timeline windows</p>
+
+            <form id="settings-routine-form" class="settings-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="settings-wake">Wake-up Time</label>
+                  <input type="time" id="settings-wake" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="settings-sleep">Sleep Time</label>
+                  <input type="time" id="settings-sleep" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="settings-work-start">College / Work Start</label>
+                  <input type="time" id="settings-work-start" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="settings-work-end">College / Work End</label>
+                  <input type="time" id="settings-work-end" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="settings-study-start">Study Window Start</label>
+                  <input type="time" id="settings-study-start" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="settings-study-end">Study Window End</label>
+                  <input type="time" id="settings-study-end" required>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary">
+                <span>Save Routine Timings</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Prototype Data Management Card -->
+          <div class="card settings-card span-col-2">
+            <h3 class="card-heading">Prototype Data Management</h3>
+            <p class="card-subheading">Control the local storage state for presentations and live college demonstrations</p>
+
+            <div class="data-actions-row">
+              <div class="data-action-block">
+                <h4>Load Realistic Demo Data</h4>
+                <p>Pre-populates sample tasks, past week study sessions, and daily reviews. Perfect for demonstrating the app to faculty or evaluators.</p>
+                <button type="button" class="btn btn-secondary" id="btn-settings-load-demo">
+                  <span>⚡ Populate Sample Demo Data</span>
+                </button>
+              </div>
+
+              <div class="data-action-block danger-block">
+                <h4>Reset All Local Storage Data</h4>
+                <p>Completely clears user profile, tasks, timer sessions, and daily reviews from browser localStorage.</p>
+                <button type="button" class="btn btn-danger" id="btn-settings-reset-data">
+                  <span>⚠️ Reset Prototype & Logout</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-bottom-nav">
+      <button class="bottom-nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dash</span>
+      </button>
+
+      <button class="bottom-nav-item" data-view="tasks">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Tasks</span>
+      </button>
+
+      <button class="bottom-nav-item" data-view="study">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Timer</span>
+      </button>
+
+      <button class="bottom-nav-item" data-view="progress">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Progress</span>
+      </button>
+
+      <button class="bottom-nav-item" data-view="review">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>Review</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ========================================================
+       MODAL: ADD NEW TASK
+       ======================================================== -->
+  <div id="modal-add-task" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          <h3>Create New Task</h3>
+        </div>
+        <button type="button" class="btn-close-modal" id="btn-close-task-modal">✕</button>
+      </div>
+
+      <form id="form-create-task" class="modal-form">
+        <div class="form-group">
+          <label for="task-title-input">Task Title *</label>
+          <input type="text" id="task-title-input" placeholder="e.g. Implement Dijkstra's Algorithm in C++" required autocomplete="off">
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="task-category-input">Category / Subject</label>
+            <select id="task-category-input" class="select-input" required>
+              <option value="Computer Science">Computer Science</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Projects">Projects</option>
+              <option value="Assignments">Assignments</option>
+              <option value="General">General</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="task-priority-input">Priority Level</label>
+            <select id="task-priority-input" class="select-input" required>
+              <option value="High">🔴 High Priority</option>
+              <option value="Medium" selected>🟡 Medium Priority</option>
+              <option value="Low">🟢 Low Priority</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="task-time-input">Estimated Time (minutes)</label>
+            <input type="number" id="task-time-input" min="5" max="360" step="5" value="45" required>
+          </div>
+
+          <div class="form-group">
+            <label for="task-date-input">Target Date (Today)</label>
+            <input type="date" id="task-date-input" required readonly style="opacity: 0.85; cursor: default;">
+            <small style="color: var(--text-muted); font-size: 0.73rem; display: block; margin-top: 4px;">Tasks are scheduled for today and automatically archived at midnight.</small>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-task-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <span>Add Task</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<!-- Firebase Configuration -->
+<script src="firebase-config.js"></script>
+
+<!-- StudyFlow Application -->
+<script src="script.js"></script>
+</body>
+</html>
